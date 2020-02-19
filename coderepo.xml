@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="3.1" method="upgrade">
+	<name>CodersRepo</name>
+	<author>MNK Coders</author>
+	<creationDate>February 2020</creationDate>
+	<copyright>(C) 2005 - 2020 Open Source Matters. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<authorEmail>info@mnkcoders.com</authorEmail>
+	<authorUrl>mnkcoders.com</authorUrl>
+	<version>0.0.1</version>
+	<description>COM_CODEREPO_XML_DESCRIPTION</description>
+	<administration>
+		<!-- Administration menu -->
+		<menu>COM_CODEREPO</menu>
+		<files folder="admin">
+			<filename>repository.php</filename>
+			<filename>controller.php</filename>
+			<folder>controllers</folder>
+                        <folder>language</folder>
+			<folder>models</folder>
+			<folder>controller</folder>
+			<folder>view</folder>
+		</files>
+		<languages folder="admin">
+			<language tag="en-GB">language/en-GB.com_coderepo.ini</language>
+			<language tag="en-GB">language/en-GB.com_coderepo.sys.ini</language>
+		</languages>
+	</administration>
+</extension>
