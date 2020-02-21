@@ -1,26 +1,26 @@
-<?php namespace CODERS\Repository;
+<?php namespace CODERS\CodeRepo;
 /**
  * 
  */
 final class Resource{
     
     private $_meta = array(
-        'ID'=>0,
-        'public_id'=>'',
+        'ID'=>'',
+        //'public_id'=>'',
         'name'=>'',
         'type'=>'',
-        'storage'=>'default',
+        'collection'=>'default',
         'date_created'=>NULL,
         'date_updated'=>NULL,
     );
-    //private $_ID,$_public_id,$_name,$_type,$_storage,$_date_created,$_date_updated = NULL;
+    //private $_ID,$_public_id,$_name,$_type,$_collection,$_date_created,$_date_updated = NULL;
     /**
      * @param array $meta
      * @param string $buffer
      */
     private final function __construct( array $meta ) {
         
-        
+        //fill in resource data
         $this->populate($meta);
     }
     /**
@@ -29,7 +29,7 @@ final class Resource{
      */
     function __get($name) {
         
-        return isset($this->_meta[$name]) ? strval( $this->_meta[$name] ) : '';
+        return array_key_exists( $name , $this->_meta ) ? strval( $this->_meta[$name] ) : '';
     }
     /**
      * @param string $collection
@@ -39,71 +39,29 @@ final class Resource{
         return md5(uniqid(date('YmdHis').$collection,true));
     }
     /**
-     * 
-     * @global wpdb $wpdb
-     * @global string $table_prefix
-     * @param array $filters
-     * @return array
-     */
-    private static final function query( array $filters  = array() ){
-
-        global $wpdb;
-        
-        global $table_prefix;
-        
-        $where = array();
-        
-        foreach( $filters as $var => $val ){
-            switch( TRUE ){
-                case is_string($val):
-                    $where[] = sprintf("`%s`='%s'",$var,$val);
-                    break;
-                case is_object($val):
-                    $where[] = sprintf("`%s`='%s'",$var,$val->toString());
-                    break;
-                case is_array($val):
-                    $where[] = sprintf("`%s` IN ('%s')",$var, implode("','", $val));
-                    break;
-                default:
-                    $where[] = sprintf('`%s`=%s',$var,$val);
-                    break;
-            }
-        }
-        
-        $query = sprintf("SELECT * FROM `%scoders_repository`",$table_prefix);
-        
-        if( count($where)){
-            $query .= " WHERE " . implode(' AND ', $where);
-        }
-        
-        $result = $wpdb->get_results($query,ARRAY_A);
-
-        return ( count($result)) ? $result : array();
-     }
-    /**
      * @param array $input
-     * @return \CODERS\Repository\Resource
+     * @return \CODERS\CodeRepo\Resource
      */
     private final function populate( array $input ) {
         
         $ts = date('Y-m-d H:i:s');
         
-        $this->_meta['date_created'] = $ts;
-        $this->_meta['date_updated'] = $ts;
-        
         foreach($input as $var => $val ){
             if(array_key_exists( $var, $this->_meta)){
-                switch($var){
-                    case 'ID':
-                        $this->_meta[$var] = intval($val);
-                        break;
-                    default:
-                        $this->_meta[$var] = $val;
-                        break;
-                }
-                
+                $this->_meta[ $var ] = $val;
             }
         }
+
+        if(strlen($this->_meta['date_created']) === 0){
+            $this->_meta['date_created'] = $ts;
+        }
+        if(strlen($this->_meta['date_updated']) === 0){
+            $this->_meta['date_updated'] = $ts;
+        }
+        if(strlen($this->_meta['ID']) === 0){
+            $this->_meta['ID'] = self::GenerateID( $this->_meta['collection'] );
+        }
+        
 
         return $this;
     }
@@ -111,7 +69,7 @@ final class Resource{
      * @return string
      */
     private final function path(){
-        return sprintf('%s/%s/%s', \CodersRepo::base(),$this->storage,$this->public_id);
+        return sprintf('%s/%s/%s', \CodersRepo::base(),$this->collection,$this->public_id);
     }
     /**
      * 
@@ -140,7 +98,7 @@ final class Resource{
      * @global string $table_prefix
      * @return boolean
      */
-    private static final function register( \CODERS\Repository\Resource $R ){
+    private static final function register( \CODERS\CodeRepo\Resource $R ){
         
         global $wpdb,$table_prefix;
         
@@ -149,35 +107,11 @@ final class Resource{
         return $inserted !== FALSE && $inserted > 0;
     }
     /**
-     * @param string $collection
-     * @return boolean
-     */
-    private static final function checkCollection( $collection ){
-        
-        $path = \CodersRepo::base($collection);
-        
-        return ( filetype( $path ) === 'dir' ) ? TRUE : mkdir($path);
-    }
-    /**
      * @return boolean
      */
     public final function delete(){
         
-        return self::remove($this->_ID);
-    }
-    /**
-     * @global wpdb $wpdb
-     * @global string $table_prefix
-     * @param string $id
-     * @return boolean
-     */
-    public static final function remove( $id ){
-        
-        global $wpdb,$table_prefix;
-        
-        $deleted = $wpdb->delete(sprintf('%scoders_repository',$table_prefix), array( 'ID' => $id ) );
-        
-        return $deleted !== FALSE && $deleted > 0;
+        return Repository::remove( [ 'ID' => $this->_meta['ID'] ] );
     }
     /**
      * @return array
@@ -186,38 +120,13 @@ final class Resource{
         
         $filters = is_array($search) ? $search : array('ID'=>$search);
         
-        return $this->query($filters);
-    }
-    /**
-     * @param string $collection
-     * @return array
-     */
-    public static final function collection( $collection ){
-        
-        return self::query( array( 'storage' => $collection ) );
-    }
-    /**
-     * @return array
-     */
-    public static final function storage(){
-        
-        $output = array();
-        $root = \CodersRepo::base();
-        //var_dump(self::base());
-        //var_dump(scandir(self::base()));
-        foreach(scandir($root) as $item ){
-            if( is_dir($root . '/' . $item ) && $item !== '.' && $item !== '..' ){
-                $output[] = $item;
-            }
-        }
-        
-        return $output;
+        return Repository::query($filters);
     }
     /**
      * 
      * @param array $meta
      * @param string $buffer
-     * @return boolean|\CODERS\Repository\Resource
+     * @return boolean|\CODERS\CodeRepo\Resource
      * @throws \Exception
      */
     public static final function create( array $meta , $buffer = '' ){
@@ -230,18 +139,18 @@ final class Resource{
                 case !array_key_exists('type', $meta):
                     throw new \Exception('EMPTY_FILETYPE_ERROR');
                     //break;
-                case !array_key_exists('storage', $meta):
-                    $meta['storage'] = 'default';
+                case !array_key_exists('collection', $meta):
+                    $meta['collection'] = 'default';
                     break;
             }
             
-            $meta['public_id'] = self::GenerateID( $meta['storage'] );
+            $meta['ID'] = self::GenerateID( $meta['collection'] );
             
             $R = new Resource( $meta , $buffer );
             
-            if(strlen($buffer) && !$R->exists( ) ){
+            if( strlen($buffer) && !$R->exists( ) ){
                 
-                if( !self::checkCollection($meta['storage']) || !$R->write($buffer) ){
+                if( !Repository::checkCollection( $meta['collection'] ) || !$R->write($buffer) ){
                    
                     return FALSE;
                 }
@@ -263,7 +172,7 @@ final class Resource{
     public static final function upload( $input , $collection = 'default' ){
         
         try{
-            $destination = \CodersRepo::base($collection);
+            $destination = Repository::base($collection);
             
             $fileMeta = array_key_exists($input, $_FILES) ? $_FILES[ $input ] : array();
 

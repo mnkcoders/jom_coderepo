@@ -19,7 +19,7 @@
                         <folder>language</folder>
 			<folder>models</folder>
 			<folder>controller</folder>
-			<folder>view</folder>
+			<folder>views</folder>
 		</files>
 		<languages folder="admin">
 			<language tag="en-GB">language/en-GB.com_coderepo.ini</language>
