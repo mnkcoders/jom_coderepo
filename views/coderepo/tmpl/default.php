@@ -6,7 +6,16 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 defined('_JEXEC') or die;
+
 ?>
-<h1><?php echo $this->msg; ?></h1>
+<div class="container">
+    <h1 class="title"><?php echo $this->title; ?></h1>
+    <ul class="collection">
+        <?php foreach( $this->list_collection as $item ) : ?>
+        <li><?php print $item; ?></li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+
 
 

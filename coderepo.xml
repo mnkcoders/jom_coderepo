@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" version="3.1" method="upgrade">
-	<name>CodersRepo</name>
+	<name>CodeRepo</name>
 	<author>MNK Coders</author>
 	<creationDate>February 2020</creationDate>
 	<copyright>(C) 2005 - 2020 Open Source Matters. All rights reserved.</copyright>
@@ -15,6 +15,7 @@
 		<files folder="admin">
 			<filename>repository.php</filename>
 			<filename>controller.php</filename>
+			<folder>assets</folder>
 			<folder>controllers</folder>
                         <folder>language</folder>
 			<folder>models</folder>
