@@ -11,6 +11,10 @@ defined('_JEXEC') or die;
 {
 	throw new JAccessExceptionNotallowed(JText::_('JERROR_ALERTNOAUTHOR'), 403);
 }*/
+
+//initialize dependencies
+require_once( __DIR__ . '/coders.php');
+
 $controller = JControllerLegacy::getInstance('CodeRepo')
         ->execute(JFactory::getApplication()->input->get('task'))
         ->redirect();
