@@ -1,4 +1,4 @@
-<?php namespace CODERS\CodeRepo;
+<?php namespace CODERS\Repository;
 /**
  * 
  */
@@ -40,7 +40,7 @@ final class Resource{
     }
     /**
      * @param array $input
-     * @return \CODERS\CodeRepo\Resource
+     * @return \CODERS\Repository\Resource
      */
     private final function populate( array $input ) {
         
@@ -98,7 +98,7 @@ final class Resource{
      * @global string $table_prefix
      * @return boolean
      */
-    private static final function register( \CODERS\CodeRepo\Resource $R ){
+    private static final function register( \CODERS\Repository\Resource $R ){
         
         global $wpdb,$table_prefix;
         
@@ -126,7 +126,7 @@ final class Resource{
      * 
      * @param array $meta
      * @param string $buffer
-     * @return boolean|\CODERS\CodeRepo\Resource
+     * @return boolean|\CODERS\Repository\Resource
      * @throws \Exception
      */
     public static final function create( array $meta , $buffer = '' ){

@@ -15,6 +15,8 @@ defined('_JEXEC') or die;
 //initialize dependencies
 require_once( __DIR__ . '/coders.php');
 
+CodersFramework::instance();
+
 $controller = JControllerLegacy::getInstance('CodeRepo')
         ->execute(JFactory::getApplication()->input->get('task'))
         ->redirect();

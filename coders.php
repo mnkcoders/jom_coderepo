@@ -11,8 +11,8 @@ final class CodersFramework{
     private $_classes = [
         'renderer',
         'dictionary',
-        //'repository',
-        //'resource',
+        'repository',
+        'resource',
     ];
     
     private function __construct() {
@@ -25,7 +25,9 @@ final class CodersFramework{
     private final function preload(){
         
         foreach( $this->_classes as $class ){
-            require_once( sprintf( '%s/classes/%s.class.php' , __DIR__,$class ) );
+            $path = sprintf( '%s/classes/%s.class.php' , __DIR__,$class );
+            //print( $path . ':'.file_exists(  $path) );
+            require_once( $path );
         }
         
         return $this;
@@ -42,5 +44,7 @@ final class CodersFramework{
         return self::$_INSTANCE;
     }
 }
-//initialize dependencies
-require_once( __DIR__ . '/classes/renderer.class.php');
+
+
+
+

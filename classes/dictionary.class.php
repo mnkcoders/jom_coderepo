@@ -1,6 +1,6 @@
 <?php namespace CODERS\Repository;
 
-defined('ABSPATH') or die;
+defined('_JEXEC') or die;
 
 /**
  * Descriptor de tipos de datos

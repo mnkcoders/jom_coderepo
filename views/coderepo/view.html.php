@@ -31,12 +31,12 @@ class CodeRepoViewCodeRepo extends \CODERS\Repository\RendererBase {
         
         $collections = array();
 
-        foreach( $this->list_collections() as $item => $label ){
+        foreach( $this->list_collections() as $item ){
             $collections[] = self::__html('a',array(
                 'href'=>'#' . $item ,
                 'target'=>'_self' ,
                 'class'=>''
-                ),$label );
+                ),$item );
         }
         
         return self::__html('li',

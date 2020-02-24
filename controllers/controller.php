@@ -47,7 +47,7 @@ class Controller {
      */
     protected final function getStorageAttribute(){
         
-        return \CODERS\CodeRepo\Resource::storage();
+        return \CODERS\Repository\Resource::storage();
     }
     /**
      * @return string|FALSE
@@ -63,7 +63,7 @@ class Controller {
      */
     protected final function getCollectionMethod( array $attributes ){
         return count($attributes) ?
-            \CODERS\CodeRepo\Resource::collection($attributes[0]) :
+            \CODERS\Repository\Resource::collection($attributes[0]) :
             array();
     }
     /**
@@ -110,7 +110,7 @@ class Controller {
         
         switch( $action ){
             case 'upload':
-                $R = \CODERS\CodeRepo\Resource::upload( 'coders_repo_upload' );
+                $R = \CODERS\Repository\Resource::upload( 'coders_repo_upload' );
                 //var_dump($R);
                 break;
         }
@@ -122,7 +122,7 @@ class Controller {
         
         if(array_key_exists('upload', $request)){
             
-            $R = \CODERS\CodeRepo\Resource::upload($request['upload']);
+            $R = \CODERS\Repository\Resource::upload($request['upload']);
             
             var_dump($R);
             
@@ -149,7 +149,7 @@ class Controller {
     }
     /**
      * @param String $action
-     * @return \CODERS\CodeRepo\Admin\Controller
+     * @return \CODERS\Repository\Admin\Controller
      */
     public static final function action( $action = '' ){
         

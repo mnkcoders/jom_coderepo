@@ -53,9 +53,7 @@ class CodeRepoModelCodeRepo extends \Joomla\CMS\MVC\Model\BaseDatabaseModel
      * @return array
      */
     public function getCollections(){
-        return array(
-            'default' => 'Default',
-        );
+        return \CODERS\Repository\Repository::instance()->collections();
     }
 }
 
