@@ -4,12 +4,18 @@
  */
 final class Resource{
     
+    const STATUS_CREATED = 0;
+    const STATUS_SAVED = 1;
+    const STATUS_REMOVED = 2;
+    
     private $_meta = array(
         'ID'=>'',
         //'public_id'=>'',
         'name'=>'',
         'type'=>'',
+        'size' => self::STATUS_CREATED,
         'collection'=>'default',
+        'status' => 1,
         'date_created'=>NULL,
         'date_updated'=>NULL,
     );
