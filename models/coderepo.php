@@ -8,15 +8,6 @@ class CodeRepoModelCodeRepo extends \Joomla\CMS\MVC\Model\BaseDatabaseModel
     private $_settings = array(
         'collection' => 'default'
     );
-    //test
-    private $_testData = array(
-        'default' => array(
-            'A' => array(
-                'title' => 'A',
-                'type' => 'text',
-            )
-        )
-    );
     /**
      * @param string $name
      * @param mixed $value
@@ -37,17 +28,29 @@ class CodeRepoModelCodeRepo extends \Joomla\CMS\MVC\Model\BaseDatabaseModel
      * @return array
      */
     public function getResources(){
-        return array_key_exists($this->collection, $this->_testData) ?
-                $this->_testData[ $this->collection ] :
-                array();
+
+        $list = \CODERS\Repository\Repository::collection($this->collection);
+                
+        return $list;
+    }
+    /**
+     * @return int
+     */
+    public function getUploadSize(){
+        return 256*256*10;
+    }
+    /**
+     * @return string
+     */
+    public function getCollection(){
+        return $this->_settings['collection'];
     }
     /**
      * @return Int
      */
     public function getCount(){
-        return array_key_exists($this->collection, $this->_testData) ?
-                count( $this->_testData[ $this->collection ] ) :
-                0;
+        
+        return count( $this->getResources());
     }
     /**
      * @return array

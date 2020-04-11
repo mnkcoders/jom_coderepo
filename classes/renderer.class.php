@@ -22,7 +22,7 @@ abstract class RendererBase extends \JViewLegacy{
      * @return \CODERS\Repository\RendererBase
      */
     protected final function registerStyle( $style ){
-
+        
         \JFactory::getDocument()->addStyleSheet( $style );
 
         return $this;
@@ -70,7 +70,7 @@ abstract class RendererBase extends \JViewLegacy{
         }
         elseif (preg_match('/^get_/', $name)) {
             $get = substr($name, 4);
-            return $this->get( $get , 'no_' . $get );
+            return $this->get( $get , $name );
         }
         elseif (preg_match('/^label_/', $name) ) {
             return $this->__label(substr($name, 6));

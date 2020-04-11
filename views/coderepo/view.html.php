@@ -16,12 +16,16 @@ class CodeRepoViewCodeRepo extends \CODERS\Repository\RendererBase {
      * @return ARRAY
      */
     protected function list_resources(){
-        return $this->get('Resources');
+        
+        $list =  $this->get('Resources'  );
+        
+        return !is_null($list) ? $list : array();
     }
     /**
      * @return array
      */
     protected function list_collections() {
+        
         return $this->get( 'Collections' );
     }
     /**
@@ -30,18 +34,22 @@ class CodeRepoViewCodeRepo extends \CODERS\Repository\RendererBase {
     protected function display_sidebar() {
         
         $collections = array();
+        
+        $active = $this->get('Collection');
 
         foreach( $this->list_collections() as $item ){
-            $collections[] = self::__html('a',array(
-                'href'=>'#' . $item ,
-                'target'=>'_self' ,
-                'class'=>''
-                ),$item );
+            $collections[] = self::__html('li',
+                    array('class'=> $active === $item ? 'active' : ''),
+                    self::__html('a',array(
+                        'href'=>'#' . $item ,
+                        'target'=>'_self' ),$item ) );
         }
         
-        return self::__html('li',
-                array('class'=>'nav nav-list'),
-                $collections );
+        return self::__html('div',array('class'=>'sidebar'),
+                self::__html('div',array('class'=>'sidebar-nav'),
+                        self::__html('ul',
+                            array('class'=>'nav nav-list clearfix'),
+                            $collections ) ) );
     }
     /**
      * Display the Hello World view
@@ -50,11 +58,13 @@ class CodeRepoViewCodeRepo extends \CODERS\Repository\RendererBase {
      */
     function display($tpl = null) {
         
-        $this->getModel()->collection = 'test';
+        //$this->getModel()->collection = 'test';
 
         $this->registerSetting('sidebar',TRUE)
                 ->registerScript('https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js')
-                ->registerStyle('https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js')
+                ->registerStyle('https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css')
+                ->registerStyle(sprintf('%sadministrator/components/com_coderepo/assets/coderepo.css',JURI::root()))
+                ->registerScript(sprintf('%sadministrator/components/com_coderepo/assets/coderepo.js',JURI::root()))
                 ->set('title','Collection');
 
         // Display the view

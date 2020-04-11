@@ -5,6 +5,7 @@ CREATE TABLE `pad_coder_repo` (
  `size` int(11) NOT NULL,
  `status` tinyint(1) NOT NULL,
  `collection` varchar(32) NOT NULL,
+ `sorting` INT NOT NULL DEFAULT '0',
  `date_created` datetime NOT NULL,
  `date_updated` datetime NOT NULL,
  PRIMARY KEY (`ID`)

@@ -9,12 +9,17 @@
 	<authorUrl>mnkcoders.com</authorUrl>
 	<version>0.0.1</version>
 	<description>COM_CODEREPO_XML_DESCRIPTION</description>
+        <files folder="site">
+            <filename>coderepo.php</filename>
+        </files>
 	<administration>
 		<!-- Administration menu -->
-		<menu>COM_CODEREPO</menu>
+		<menu>CodeRepo</menu>
 		<files folder="admin">
-			<filename>repository.php</filename>
+			<filename>coderepo.php</filename>
+			<filename>coders.php</filename>
 			<filename>controller.php</filename>
+			<filename>coderepo.xml</filename>
 			<folder>assets</folder>
 			<folder>controllers</folder>
                         <folder>language</folder>

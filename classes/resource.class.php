@@ -10,12 +10,11 @@ final class Resource{
     
     private $_meta = array(
         'ID'=>'',
-        //'public_id'=>'',
         'name'=>'',
         'type'=>'',
-        'size' => self::STATUS_CREATED,
+        'size' => 0,
         'collection'=>'default',
-        'status' => 1,
+        'status' => self::STATUS_CREATED,
         'date_created'=>NULL,
         'date_updated'=>NULL,
     );
@@ -34,8 +33,17 @@ final class Resource{
      * @return Mixed
      */
     function __get($name) {
-        
-        return array_key_exists( $name , $this->_meta ) ? strval( $this->_meta[$name] ) : '';
+        switch( TRUE ){
+            case (preg_match('/^is_/', strtolower( $name))):
+                $has = sprintf('is%s',substr($name, 3));
+                return method_exists($this, $has) ? $this->$has() : FALSE;
+            case !array_key_exists( $name , $this->_meta):
+                $get = sprintf('get%s', preg_replace('/_/', '', $name) );
+                return method_exists($this, $get) ? $this->$get() : '';
+            default:
+                return array_key_exists( $name , $this->_meta ) ?
+                    strval( $this->_meta[$name] ) : '';
+        }
     }
     /**
      * @param string $collection
@@ -72,32 +80,103 @@ final class Resource{
         return $this;
     }
     /**
-     * @return string
+     * @return boolean
      */
-    private final function path(){
-        return sprintf('%s/%s/%s', \CodersRepo::base(),$this->collection,$this->public_id);
+    public final function isAttachment(){
+
+        //any non attachment types should fall here
+        return !in_array($this->_meta['type'], array(
+            'image/png',
+            'image/bmp',
+            'image/jpg',
+            'image/jpeg',
+            'image/gif',
+            //case 'text/plain',
+            //case 'text/html',
+            //case 'text/json',
+            //'application/json',
+        ));
     }
     /**
-     * 
+     * @return boolean
+     */
+    public final function isImage(){
+        //any non attachment types should fall here
+        return in_array($this->_meta['type'], array(
+            'image/png',
+            'image/bmp',
+            'image/jpg',
+            'image/jpeg',
+            'image/gif',
+        ));
+    }
+    /**
+     * @return string
+     */
+    public final function getClassType(){
+        
+        $class = array(
+            $this->isImage() ? 'icon-image' : 'icon-attachment',
+            preg_replace('/\//', '-', $this->_meta['type'] )
+        );
+        
+        return implode(' ', $class);
+    }
+    /**
+     * @return string
+     */
+    public final function getPath(){
+
+        $root = Repository::instance()->root( $this->collection );
+
+        return sprintf('%s/%s', $root , $this->ID );
+    }
+    /**
+     * @return String|URL
+     */
+    public final function getUrl(){
+        return Repository::url($this->_meta['ID']);
+    }
+    /**
+     * @return boolean
+     */
+    public final function validate(){
+        return strlen( $this->_meta['ID'] )  > 0;
+    }
+    /**
      * @return boolean
      */
     public final function exists(){
-        return file_exists($this->path());
+        return file_exists($this->getPath());
     }
     /**
      * @param string|stream $buffer
      * @return int|boolean
      */
-    private final function write( $buffer ){
+    public final function write( $buffer ){
         
-        return file_put_contents($this->path(), $buffer);
+        return file_put_contents($this->getPath(), $buffer);
     }
     /**
      * @return string|Boolean
      */
     public final function read(){
         
-        return $this->exists() ? file_get_contents($this->path()) : FALSE;
+        return $this->exists() ? file_get_contents($this->getPath()) : FALSE;
+    }
+    /**
+     * @return array
+     */
+    public final function meta(){
+
+        return $this->_meta;
+    }
+    /**
+     * @return String|JSON
+     */
+    public final function json(){
+        
+        return json_encode( $this->meta() );
     }
     /**
      * @global \wpdb $wpdb
@@ -106,11 +185,32 @@ final class Resource{
      */
     private static final function register( \CODERS\Repository\Resource $R ){
         
-        global $wpdb,$table_prefix;
+        $db = \JFactory::getDbo();
+        $fields = array_keys( $R->_meta );
+        $values = array();
         
-        $inserted = $wpdb->insert(sprintf('%scoders_repository',$table_prefix),$R->_meta);
+        foreach( $R->_meta as $val ){
+            switch( TRUE ){
+                case is_array($val):
+                    $values[] = $db->quote( implode('|', $val) );
+                    break;
+                case is_string($val):
+                    $values[] = $db->quote($val);
+                    break;
+                default:
+                    $values[] = $val;
+                    break;
+            }
+        }
         
-        return $inserted !== FALSE && $inserted > 0;
+        $insert = $db->getQuery( true );
+        $insert->insert($db->quoteName('#__coder_repo'))
+                ->columns($db->quoteName($fields))
+                ->values(implode(',', $values));
+        $db->setQuery($insert);
+        $db->execute();
+        
+        return TRUE;
     }
     /**
      * @return boolean
@@ -127,6 +227,16 @@ final class Resource{
         $filters = is_array($search) ? $search : array('ID'=>$search);
         
         return Repository::query($filters);
+    }
+    /**
+     * @param array $data
+     * @return \CODERS\Repository\Resource | FALSE
+     */
+    public static final function import( array $data ){
+        
+        $R = new Resource( $data );
+
+        return $R->validate() ? $R : FALSE;
     }
     /**
      * 
@@ -162,77 +272,14 @@ final class Resource{
                 }
             }
             
+            $R->_meta['status'] = self::STATUS_SAVED;
+            
             return self::register($R) ? $R : FALSE;
         }
         catch (\Exception $ex) {
             print( $ex->getMessage() );
         }
         return FALSE;
-    }
-    /**
-     * @param string $input
-     * @param string $collection
-     * @return boolean
-     * @throws \Exception
-     */
-    public static final function upload( $input , $collection = 'default' ){
-        
-        try{
-            $destination = Repository::base($collection);
-            
-            $fileMeta = array_key_exists($input, $_FILES) ? $_FILES[ $input ] : array();
-
-            if( count($fileMeta) === 0 ){
-                throw new \Exception('UPLOAD_ERROR_INVALID_FILE');
-            }
-            
-            if( strlen($destination) === 0 ){
-                throw new \Exception('UPLOAD_ERROR_INVALID_DESTINATION');
-            }
-            
-            switch( $fileMeta['error'] ){
-                case UPLOAD_ERR_CANT_WRITE:
-                    throw new \Exception('UPLOAD_ERROR_READ_ONLY');
-                case UPLOAD_ERR_EXTENSION:
-                    throw new \Exception('UPLOAD_ERROR_INVALID_EXTENSION');
-                case UPLOAD_ERR_FORM_SIZE:
-                    throw new \Exception('UPLOAD_ERROR_SIZE_OVERFLOW');
-                case UPLOAD_ERR_INI_SIZE:
-                    throw new \Exception('UPLOAD_ERROR_CFG_OVERFLOW');
-                case UPLOAD_ERR_NO_FILE:
-                    throw new \Exception('UPLOAD_ERROR_NO_FILE');
-                case UPLOAD_ERR_NO_TMP_DIR:
-                    throw new \Exception('UPLOAD_ERROR_INVALID_TMP_DIR');
-                case UPLOAD_ERR_PARTIAL:
-                    throw new \Exception('UPLOAD_ERROR_INCOMPLETE');
-                case UPLOAD_ERR_OK:
-                    break;
-            }
-            
-            $buffer = file_get_contents($fileMeta['tmp_name']);
-            
-            unlink($fileMeta['tmp_name']);
-           
-            if( $buffer !== FALSE ){
-
-                return self::create($fileMeta , $buffer);
-            }
-        }
-        catch (\Exception $ex) {
-            print( $ex->getMessage() );
-        }
-        
-        return FALSE;
-    }
-    /**
-     * @param string $public_id
-     * @return \CodersRepoSource
-     */
-    public static final function import( $public_id ){
-        
-        $result = self::query(array('public_id'=>$public_id));
-
-        return ( count($result)) ? new Resource( $result[0] ) : FALSE;
     }
 }
 

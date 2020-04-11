@@ -1,23 +1,31 @@
 <?php defined('_JEXEC') or die; ?>
 <?php if ($this->has_sidebar) : ?>
-    <div id="j-sidebar-container" class="span2">
+    <div id="j-sidebar-container" class="j-sidebar-container j-sidebar-visible">
         <?php echo $this->display_sidebar; ?>
     </div>
 <?php endif; ?>
-<div id="j-main-container">
+<div id="j-main-container" class="span10 j-toggle-main">
     <h1 class="title"><?php echo $this->get_title; ?></h1>
-    <ul class="collection container">
-        <?php if( intval( $this->get_count ) > 0 ) : ?>
-            <?php foreach ($this->list_resources as $item_id => $data) : ?>
+    <ul class="collection">
+            <li class="item">
+                <button type="button" class="coders-repo-uploader content icon-upload large-icon">
+                    <?php print JText::_( 'Upload' ); ?>
+                </button>
+            </li>
+            <?php foreach ($this->list_resources as $item_id => $resource) : ?>
                 <li class="item">
-                    <a href="<?php
-                        print '#' . $item_id; ?>" target="_self" class="type <?php
-                        print $data['type'] ?>"><?php
-                        print $data['title']; ?></a>
+                    <!-- <?php print $item_id ?>  -->
+                    <div class="content">
+                        <a href="<?php print $resource->url; ?>"
+                           target="_blank"
+                           class="type <?php print $resource->class_type ?>">
+                        <?php if( $resource->is_image ) : ?>
+                        <img src="<?php print $resource->url ?>" alt="<?php $resource->name ?>" title="<?php print $resource->name ?>" />
+                        <?php endif; ?>
+                        <span><?php print $resource->name; ?></span>
+                        </a>
+                    </div>
                 </li>
             <?php endforeach; ?>
-        <?php else : ?>
-                <li class="empty item centered red">No items</li>
-        <?php endif; ?>
     </ul>
 </div>
